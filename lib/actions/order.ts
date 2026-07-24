@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getFilterRangeUTC, type DashboardFilter } from "@/lib/date";
 
 export type OrderInput = {
   customerName?: string;
@@ -13,16 +14,22 @@ export type OrderInput = {
   expensePaymentMethod?: string;
 };
 
-export async function getOrders() {
-  return prisma.order.findMany({ orderBy: { createdAt: "desc" } });
+/**
+ * Fetches orders, optionally restricted to an IST-based date range (defaults
+ * to "all"). Used by both the dashboard (per-filter) and the history page
+ * (filter="all").
+ */
+export async function getOrders(filter: DashboardFilter = "all") {
+  const { gte, lt } = getFilterRangeUTC(filter);
+  return prisma.order.findMany({
+    where: gte || lt ? { createdAt: { gte, lt } } : undefined,
+    orderBy: { createdAt: "desc" },
+  });
 }
 
-export async function getTodayStats() {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const orders = await prisma.order.findMany({
-    where: { createdAt: { gte: start } },
-  });
+/** Aggregate stats for an IST-based date range filter (defaults to "today"). */
+export async function getStats(filter: DashboardFilter = "today") {
+  const orders = await getOrders(filter);
   const totalSales = orders.reduce(
     (s: number, o: { amount: number }) => s + o.amount,
     0
@@ -62,6 +69,7 @@ export async function createOrder(data: OrderInput) {
     },
   });
   revalidatePath("/dashboard");
+  revalidatePath("/history");
 }
 
 export async function updateOrder(id: string, data: OrderInput) {
@@ -80,9 +88,11 @@ export async function updateOrder(id: string, data: OrderInput) {
     },
   });
   revalidatePath("/dashboard");
+  revalidatePath("/history");
 }
 
 export async function deleteOrder(id: string) {
   await prisma.order.delete({ where: { id } });
   revalidatePath("/dashboard");
+  revalidatePath("/history");
 }

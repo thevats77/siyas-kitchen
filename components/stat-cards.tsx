@@ -1,4 +1,11 @@
 import { ReceiptText, IndianRupee, Wallet, Smartphone } from "lucide-react";
+import { FILTER_OPTIONS, type DashboardFilter } from "@/lib/date";
+
+function periodLabel(filter?: DashboardFilter) {
+  if (!filter) return "Today's";
+  const option = FILTER_OPTIONS.find((o) => o.value === filter);
+  return option ? option.label : "Today's";
+}
 
 function StatCard({
   icon,
@@ -28,6 +35,7 @@ function StatCard({
 
 export function StatCards({
   stats,
+  filter,
 }: {
   stats: {
     count: number;
@@ -35,19 +43,21 @@ export function StatCards({
     cashReceived: number;
     upiReceived: number;
   };
+  filter?: DashboardFilter;
 }) {
+  const label = periodLabel(filter);
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <StatCard
         icon={<ReceiptText className="h-6 w-6" />}
-        label="Today's Orders"
+        label={`${label} Orders`}
         value={String(stats.count)}
         iconBg="bg-green-50"
         iconColor="text-[#22C55E]"
       />
       <StatCard
         icon={<IndianRupee className="h-6 w-6" />}
-        label="Today's Sales"
+        label={`${label} Sales`}
         value={`₹${stats.totalSales.toFixed(0)}`}
         iconBg="bg-blue-50"
         iconColor="text-[#3B82F6]"

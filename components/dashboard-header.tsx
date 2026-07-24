@@ -1,17 +1,15 @@
+import Link from "next/link";
+import { formatDateIST, getISTHour } from "@/lib/date";
+
 function getGreeting() {
-  const hour = new Date().getHours();
+  const hour = getISTHour();
   if (hour < 12) return "Good Morning";
   if (hour < 17) return "Good Afternoon";
   return "Good Evening";
 }
 
 function getToday() {
-  return new Date().toLocaleDateString("en-IN", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  return formatDateIST(new Date());
 }
 
 export function DashboardHeader() {
@@ -26,6 +24,12 @@ export function DashboardHeader() {
         <span className="rounded-full bg-white px-4 py-1.5 text-sm font-medium text-[#6B7280] shadow-sm">
           {getToday()}
         </span>
+        <Link
+          href="/history"
+          className="rounded-full bg-white px-4 py-1.5 text-sm font-medium text-[#3B82F6] shadow-sm"
+        >
+          Order History
+        </Link>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { OrderActions } from "@/components/order-actions";
 import { sourceBadgeClass, paymentBadgeClass } from "@/lib/badge-colors";
+import { formatTimeIST as formatTime } from "@/lib/date";
 
 export type OrderRow = {
   id: string;
@@ -21,13 +22,6 @@ export type OrderRow = {
   expensePaymentMethod: string | null;
   createdAt: Date;
 };
-
-function formatTime(date: Date) {
-  return new Date(date).toLocaleTimeString("en-IN", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
 
 function EmptyState() {
   return (
